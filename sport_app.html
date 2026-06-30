@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mes Sport">
+<meta name="theme-color" content="#1B4332">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Mes Sport — Séances à la maison</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--g1:#1B4332;--g2:#2D6A4F;--g3:#40916C;--g4:#74C69D;--g5:#D8F3DC;--g6:#F0FAF3;--amber:#E9C46A;--amber-l:#FFF8E1;--coral:#E76F51;--red:#DC2626;--red-l:#FEF2F2;--text:#1A1A1A;--muted:#6B7280;--border:#D1E7DD;--bg:#F4F8F5;--white:#FFFFFF;--r:14px;--rs:8px;--shadow:0 2px 16px rgba(27,67,50,.10);--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+.nav{background:var(--g1);padding:env(safe-area-inset-top,0px) 0 0;flex-shrink:0}
+.nav-top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}
+.nav-title{font-size:18px;font-weight:700;color:white;letter-spacing:-.5px}
+.nav-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px}
+.nav-tabs{display:flex}
+.nav-tab{flex:1;padding:9px 4px 11px;text-align:center;font-size:11px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;font-family:var(--font)}
+.nav-tab.active{color:white;border-bottom-color:var(--amber)}
+.tab-icon{font-size:17px;display:block;margin-bottom:2px}
+.auth-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 14px;font-size:11px;background:var(--g6);color:var(--g2);border-bottom:1px solid var(--border);flex-shrink:0}
+.auth-bar.ok{background:var(--g5);color:var(--g1)}
+.auth-bar.err{background:var(--red-l);color:var(--red)}
+.auth-bar button{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;font-family:var(--font);white-space:nowrap}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.content{padding:14px 14px 32px;display:none}
+.content.active{display:block}
+
+.card{background:var(--white);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.card-t{font-size:13px;font-weight:700;color:var(--g1);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.btn{display:block;width:100%;padding:14px;background:var(--g1);color:white;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);text-align:center}
+.btn:active{opacity:.85}
+.btn.secondary{background:var(--g6);color:var(--g1);border:1.5px solid var(--border)}
+.btn.amber{background:var(--amber);color:#5c4400}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+
+.ex-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.ex-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g6);border-radius:var(--rs)}
+.ex-num{width:24px;height:24px;border-radius:50%;background:var(--g1);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ex-name{font-size:13px;font-weight:600;color:var(--text)}
+.ex-cat{font-size:10px;color:var(--muted)}
+
+.session-view{text-align:center;padding:20px 10px}
+.phase-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:5px 14px;border-radius:20px;display:inline-block;margin-bottom:14px}
+.phase-label.work{background:var(--coral);color:white}
+.phase-label.rest{background:var(--g3);color:white}
+.phase-label.warmup,.phase-label.cooldown{background:var(--amber);color:#5c4400}
+.ex-current{font-size:28px;font-weight:700;color:var(--g1);margin-bottom:6px;line-height:1.2}
+.ex-cue{font-size:13px;color:var(--muted);margin-bottom:24px;padding:0 10px}
+.timer-big{font-size:72px;font-weight:700;font-family:var(--mono);color:var(--g1);margin-bottom:10px}
+.timer-progress{font-size:13px;color:var(--muted);margin-bottom:24px}
+.timer-bar-wrap{background:var(--border);border-radius:20px;height:8px;overflow:hidden;margin:0 10px 24px}
+.timer-bar-fill{height:100%;background:var(--g3);border-radius:20px;transition:width 1s linear}
+
+.q-block{margin-bottom:18px}
+.q-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px}
+.q-options{display:flex;gap:6px;flex-wrap:wrap}
+.q-opt{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:500;color:var(--text);cursor:pointer;font-family:var(--font)}
+.q-opt.selected{background:var(--g1);color:white;border-color:var(--g1)}
+textarea.q-text{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--font);font-size:13px;resize:vertical;min-height:60px}
+
+.hist-item{background:var(--white);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow);margin-bottom:8px}
+.hist-date{font-size:12px;font-weight:700;color:var(--g1)}
+.hist-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.hist-empty{text-align:center;color:var(--muted);font-size:13px;padding:30px 10px}
+
+.info-block{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.info-t{font-size:14px;font-weight:700;color:var(--g1);margin-bottom:7px}
+.info-txt{font-size:13px;color:var(--muted);line-height:1.65}
+.field-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.field-row input{flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--mono);font-size:14px}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-top">
+    <div><div class="nav-title">Mes Sport</div><div class="nav-sub">Poids du corps · à la maison</div></div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('seance')"><span class="tab-icon">🏋️</span>Séance</div>
+    <div class="nav-tab" onclick="switchTab('historique')"><span class="tab-icon">📅</span>Historique</div>
+    <div class="nav-tab" onclick="switchTab('infos')"><span class="tab-icon">ℹ️</span>Infos</div>
+  </div>
+</nav>
+<div class="auth-bar" id="auth-bar"><span>Connexion en cours…</span></div>
+<div class="scroll-area">
+
+<!-- SEANCE -->
+<div class="content active" id="tab-seance">
+  <div id="seance-container"></div>
+</div>
+
+<!-- HISTORIQUE -->
+<div class="content" id="tab-historique">
+  <div id="historique-container"></div>
+</div>
+
+<!-- INFOS -->
+<div class="content" id="tab-infos">
+  <div class="info-block">
+    <div class="info-t">Comment ça marche</div>
+    <div class="info-txt">
+      Chaque séance propose un circuit d'exercices au poids du corps, varié à chaque fois.
+      Échauffement (5 min) → circuit chronométré (effort/repos) → retour au calme (5 min).
+      Le minuteur t'accompagne avec des bips aux transitions — pas besoin de regarder l'écran en continu.
+    </div>
+  </div>
+  <div class="info-block">
+    <div class="info-t">Ton poids (pour le calcul des calories)</div>
+    <div class="info-txt">
+      Nécessaire pour estimer les calories brûlées. Modifiable à tout moment.
+      <div class="field-row">
+        <input type="number" id="poids-input" min="30" max="200" placeholder="kg" />
+        <button class="btn secondary" style="width:auto;padding:8px 14px" onclick="savePoids()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+  <div class="info-block">
+    <div class="info-t">⚠️ À propos des calories affichées</div>
+    <div class="info-txt">
+      Estimation par tables MET (type d'exercice × durée × poids), pas une mesure réelle
+      (pas de capteur de fréquence cardiaque). Donne un ordre de grandeur, pas une valeur exacte.
+    </div>
+  </div>
+  <div class="info-block">
+    <div class="info-t">Progression</div>
+    <div class="info-txt">
+      Pour l'instant, le circuit varie aléatoirement à chaque séance. Une routine de génération
+      plus intelligente (qui s'adapte à tes retours de fin de séance) sera ajoutée plus tard,
+      sur le même principe que la routine hebdomadaire de Mes Menus.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="exercices_data.js"></script>
+<script>
+// fbSync stub — remplacé par firebase-sync.js au chargement si connecté
+let fbSyncSport = {
+  saveHistorique: d => { try{localStorage.setItem('sportHistorique', JSON.stringify(d));}catch(e){} },
+};
+
+const WARMUP_SEC = 300;
+const COOLDOWN_SEC = 300;
+const WORK_SEC = 40;
+const REST_SEC = 20;
+const ROUNDS = 2;
+const NB_EXERCICES = 6;
+
+let poids = parseFloat(localStorage.getItem('sportPoids')) || 75;
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('poids-input');
+  if (el) el.value = poids;
+});
+
+function savePoids(){
+  const v = parseFloat(document.getElementById('poids-input').value);
+  if (!v || v < 30 || v > 200) return;
+  poids = v;
+  localStorage.setItem('sportPoids', v);
+}
+
+let historique = JSON.parse(localStorage.getItem('sportHistorique') || '[]');
+
+// ── Génération du circuit du jour ──────────────────────────────
+// V1 : sélection variée aléatoire (mix des 4 catégories). Sera remplacée
+// plus tard par une génération adaptative basée sur les retours de séances
+// précédentes (routine hebdomadaire, comme le Cowork de Mes Menus).
+function genererCircuitDuJour(){
+  const dernier = historique[historique.length - 1];
+  const dernierIds = dernier ? dernier.exercices : [];
+  let pool = EXERCICES.filter(e => !dernierIds.includes(e.id));
+  if (pool.length < NB_EXERCICES) pool = EXERCICES.slice();
+
+  const parCategorie = {};
+  CATEGORIES_ORDRE.forEach(c => parCategorie[c] = pool.filter(e => e.categorie === c));
+
+  const choisis = [];
+  let i = 0;
+  while (choisis.length < NB_EXERCICES) {
+    const cat = CATEGORIES_ORDRE[i % CATEGORIES_ORDRE.length];
+    const dispo = parCategorie[cat].filter(e => !choisis.find(c2 => c2.id === e.id));
+    if (dispo.length > 0) choisis.push(dispo[Math.floor(Math.random() * dispo.length)]);
+    i++;
+    if (i > 50) break;
+  }
+  return choisis;
+}
+
+let circuitDuJour = genererCircuitDuJour();
+let session = null; // état de la séance en cours
+
+// ── TABS ─────────────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.nav-tab').forEach((el,idx)=>el.classList.toggle('active',['seance','historique','infos'][idx]===t));
+  document.querySelectorAll('.content').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='historique') renderHistorique();
+}
+
+// ── VUE PRE-SEANCE ──────────────────────────────────────────────
+function renderPreSeance(){
+  const html = `
+    <div class="card">
+      <div class="card-t">Séance du jour</div>
+      <p style="font-size:12px;color:var(--muted)">Échauffement 5 min → circuit (${ROUNDS} tours) → retour au calme 5 min</p>
+      <div class="ex-list">
+        ${circuitDuJour.map((e,i)=>`
+          <div class="ex-item">
+            <div class="ex-num">${i+1}</div>
+            <div>
+              <div class="ex-name">${e.nom}</div>
+              <div class="ex-cat">${e.categorie}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <button class="btn" style="margin-top:16px" onclick="demarrerSeance()">🏋️ Démarrer la séance</button>
+      <button class="btn secondary" style="margin-top:8px" onclick="circuitDuJour=genererCircuitDuJour();renderPreSeance()">🔄 Changer les exercices</button>
+    </div>`;
+  document.getElementById('seance-container').innerHTML = html;
+}
+
+// ── MOTEUR DE SEANCE ────────────────────────────────────────────
+function buildPhaseQueue(){
+  const q = [];
+  q.push({type:'warmup', label:'Échauffement', sec:WARMUP_SEC, exo:null});
+  for(let r=0;r<ROUNDS;r++){
+    circuitDuJour.forEach(e=>{
+      q.push({type:'work', label:'Effort', sec:WORK_SEC, exo:e});
+      q.push({type:'rest', label:'Repos', sec:REST_SEC, exo:e});
+    });
+  }
+  q.push({type:'cooldown', label:'Retour au calme', sec:COOLDOWN_SEC, exo:null});
+  return q;
+}
+
+function demarrerSeance(){
+  session = {
+    queue: buildPhaseQueue(),
+    idx: 0,
+    remaining: 0,
+    timerId: null,
+    startedAt: Date.now(),
+    wakeLock: null,
+  };
+  session.remaining = session.queue[0].sec;
+  if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').then(wl => session.wakeLock = wl).catch(()=>{});
+  }
+  renderSessionView();
+  beep(440, 150);
+  session.timerId = setInterval(tickSession, 1000);
+}
+
+function tickSession(){
+  session.remaining--;
+  if (session.remaining < 0) {
+    session.idx++;
+    if (session.idx >= session.queue.length) {
+      finirSeance();
+      return;
+    }
+    session.remaining = session.queue[session.idx].sec;
+    const phase = session.queue[session.idx].type;
+    beep(phase === 'work' ? 660 : 440, 200);
+  }
+  renderSessionView();
+}
+
+function passerPhase(){
+  session.idx++;
+  if (session.idx >= session.queue.length) { finirSeance(); return; }
+  session.remaining = session.queue[session.idx].sec;
+  renderSessionView();
+}
+
+function arreterSeance(){
+  if (session && session.timerId) clearInterval(session.timerId);
+  if (session && session.wakeLock) session.wakeLock.release().catch(()=>{});
+  session = null;
+  renderPreSeance();
+}
+
+function finirSeance(){
+  clearInterval(session.timerId);
+  if (session.wakeLock) session.wakeLock.release().catch(()=>{});
+  renderQuestionsFin();
+}
+
+function fmtTime(sec){
+  const m = Math.floor(sec/60), s = sec%60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function renderSessionView(){
+  const phase = session.queue[session.idx];
+  const total = session.queue.length;
+  const pct = Math.round((session.idx / total) * 100);
+  document.getElementById('seance-container').innerHTML = `
+    <div class="session-view">
+      <div class="phase-label ${phase.type}">${phase.label}</div>
+      <div class="ex-current">${phase.exo ? phase.exo.nom : (phase.type==='warmup' ? 'Mobilité articulaire, marche sur place' : 'Étirements doux')}</div>
+      ${phase.exo ? `<div class="ex-cue">${phase.exo.cue}</div>` : '<div class="ex-cue"></div>'}
+      <div class="timer-big">${fmtTime(session.remaining)}</div>
+      <div class="timer-progress">Étape ${session.idx+1} / ${total}</div>
+      <div class="timer-bar-wrap"><div class="timer-bar-fill" style="width:${pct}%"></div></div>
+      <div class="btn-row">
+        <button class="btn secondary" onclick="passerPhase()">⏭ Passer</button>
+        <button class="btn secondary" onclick="arreterSeance()">⏹ Arrêter</button>
+      </div>
+    </div>`;
+}
+
+function beep(freq, durMs){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    osc.start();
+    osc.stop(ctx.currentTime + durMs/1000);
+  }catch(e){}
+}
+
+// ── CALORIES ──────────────────────────────────────────────────
+function calculerCalories(){
+  let kcal = 0;
+  circuitDuJour.forEach(e=>{
+    const heuresEffort = (WORK_SEC * ROUNDS) / 3600;
+    kcal += e.met * poids * heuresEffort;
+  });
+  return Math.round(kcal);
+}
+
+// ── QUESTIONS DE FIN DE SEANCE ──────────────────────────────────
+let reponsesFin = { difficultes:{}, douleur:'', completee:'oui', prochaineSeance:'pareil', motivation:'' };
+
+function renderQuestionsFin(){
+  const kcal = calculerCalories();
+  document.getElementById('seance-container').innerHTML = `
+    <div class="card">
+      <div class="card-t">Séance terminée 🎉</div>
+      <p style="font-size:13px;color:var(--g2);margin-bottom:14px">~${kcal} kcal estimées brûlées</p>
+
+      <div class="q-block">
+        <div class="q-label">Séance complétée entièrement ?</div>
+        <div class="q-options">
+          <div class="q-opt selected" data-q="completee" data-v="oui" onclick="selectOpt(this)">Oui, complète</div>
+          <div class="q-opt" data-q="completee" data-v="ecourtee" onclick="selectOpt(this)">Écourtée</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">Difficulté générale ressentie</div>
+        <div class="q-options">
+          <div class="q-opt" data-q="difficulte" data-v="facile" onclick="selectOpt(this)">Trop facile</div>
+          <div class="q-opt selected" data-q="difficulte" data-v="correct" onclick="selectOpt(this)">Correct</div>
+          <div class="q-opt" data-q="difficulte" data-v="dur" onclick="selectOpt(this)">Trop dur</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">Douleur ou gêne particulière ?</div>
+        <textarea class="q-text" id="q-douleur" placeholder="Ex: léger tiraillement épaule droite — laisse vide si rien"></textarea>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">Pour la semaine prochaine</div>
+        <div class="q-options">
+          <div class="q-opt" data-q="frequence" data-v="ajouter" onclick="selectOpt(this)">Ajouter une séance</div>
+          <div class="q-opt selected" data-q="frequence" data-v="pareil" onclick="selectOpt(this)">Garder pareil</div>
+          <div class="q-opt" data-q="frequence" data-v="retirer" onclick="selectOpt(this)">Retirer une séance</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-label">Motivation / énergie aujourd'hui</div>
+        <div class="q-options">
+          <div class="q-opt" data-q="motivation" data-v="basse" onclick="selectOpt(this)">Basse</div>
+          <div class="q-opt selected" data-q="motivation" data-v="moyenne" onclick="selectOpt(this)">Moyenne</div>
+          <div class="q-opt" data-q="motivation" data-v="haute" onclick="selectOpt(this)">Haute</div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="validerFinSeance(${kcal})">Valider</button>
+    </div>`;
+}
+
+function selectOpt(el){
+  const q = el.dataset.q;
+  document.querySelectorAll(`.q-opt[data-q="${q}"]`).forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function validerFinSeance(kcal){
+  const getSel = q => { const el = document.querySelector(`.q-opt[data-q="${q}"].selected`); return el ? el.dataset.v : null; };
+  const entry = {
+    date: new Date().toISOString(),
+    exercices: circuitDuJour.map(e=>e.id),
+    kcal,
+    completee: getSel('completee'),
+    difficulte: getSel('difficulte'),
+    douleur: document.getElementById('q-douleur').value.trim(),
+    frequenceProchaine: getSel('frequence'),
+    motivation: getSel('motivation'),
+  };
+  historique.push(entry);
+  fbSyncSport.saveHistorique(historique);
+  circuitDuJour = genererCircuitDuJour();
+  renderPreSeance();
+  switchTab('historique');
+}
+
+// ── HISTORIQUE ────────────────────────────────────────────────
+function renderHistorique(){
+  if (historique.length === 0) {
+    document.getElementById('historique-container').innerHTML = '<div class="hist-empty">Aucune séance enregistrée pour l\'instant.</div>';
+    return;
+  }
+  const html = historique.slice().reverse().map(h=>{
+    const d = new Date(h.date);
+    const exNoms = h.exercices.map(id => { const e = getExercice(id); return e ? e.nom : id; }).join(', ');
+    return `<div class="hist-item">
+      <div class="hist-date">${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>
+      <div class="hist-meta">~${h.kcal} kcal · ${h.completee==='oui'?'Complète':'Écourtée'} · Difficulté: ${h.difficulte||'-'}</div>
+      <div class="hist-meta" style="margin-top:4px">${exNoms}</div>
+      ${h.douleur ? `<div class="hist-meta" style="color:var(--coral);margin-top:4px">⚠️ ${h.douleur}</div>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('historique-container').innerHTML = html;
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+renderPreSeance();
+
+// ── SERVICE WORKER ───────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(r => console.log('[SW] Enregistré:', r.scope))
+      .catch(e => console.error('[SW] Erreur:', e));
+  });
+}
+</script>
+<script src="firebase-sync.js"></script>
+</body>
+</html>
