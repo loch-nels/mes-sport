@@ -64,9 +64,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .timer-bar-fill{height:100%;background:var(--g3);border-radius:20px;transition:width 1s linear}
 
 /* ── SILHOUETTE ANIMÉE ────────────────────────────────────────
-   Rig SVG simplifié (bâton), articulé via transform-origin sur
-   chaque groupe. Une animation CSS distincte par exercice, activée
-   via la classe .anim-<id> posée sur .fig-wrap. */
+   Rig SVG bâton ARTICULÉ : chaque bras = épaule+coude (2 segments),
+   chaque jambe = hanche+genou (2 segments). Le segment du bas est
+   imbriqué dans le segment du haut (vraie chaîne cinématique SVG) :
+   sa rotation s'ajoute à celle du parent. Une animation CSS distincte
+   par exercice, activée via la classe .anim-<id> sur .fig-wrap. */
 .fig-wrap{width:130px;height:130px;margin:0 auto 16px}
 .fig-svg{width:100%;height:100%;overflow:visible}
 .fig-svg line{stroke:var(--g1);stroke-width:7;stroke-linecap:round}
@@ -74,68 +76,93 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .fig-svg *{transform-box:view-box}
 .fig-all{transform-origin:100px 120px}
 .fig-leg-l,.fig-leg-r,.fig-torso,.fig-head{transform-origin:100px 120px}
+.fig-shin-l{transform-origin:92px 148px}
+.fig-shin-r{transform-origin:108px 148px}
 .fig-arm-l,.fig-arm-r{transform-origin:100px 75px}
+.fig-forearm-l{transform-origin:80px 95px}
+.fig-forearm-r{transform-origin:120px 95px}
 
 @keyframes kf-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}
 @keyframes kf-bob-small{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 @keyframes kf-jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
 
-/* squat */
+/* squat : silhouette de PROFIL → les 2 jambes plient ENSEMBLE, dans le même
+   sens (pas en miroir, sinon ça ressemble à une fente/marche) */
 .anim-squat .fig-all{animation:kf-bob 1.6s ease-in-out infinite}
-.anim-squat .fig-leg-l{animation:kfsq-l 1.6s ease-in-out infinite}
-.anim-squat .fig-leg-r{animation:kfsq-r 1.6s ease-in-out infinite}
-@keyframes kfsq-l{0%,100%{transform:rotate(8deg)}50%{transform:rotate(30deg)}}
-@keyframes kfsq-r{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(-30deg)}}
+.anim-squat .fig-leg-l{animation:kfsq-cuisse 1.6s ease-in-out infinite}
+.anim-squat .fig-leg-r{animation:kfsq-cuisse 1.6s ease-in-out infinite}
+.anim-squat .fig-shin-l{animation:kfsq-tibia 1.6s ease-in-out infinite}
+.anim-squat .fig-shin-r{animation:kfsq-tibia 1.6s ease-in-out infinite}
+@keyframes kfsq-cuisse{0%,100%{transform:rotate(6deg)}50%{transform:rotate(38deg)}}
+@keyframes kfsq-tibia{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-58deg)}}
 
-/* squat-sumo : même principe, jambes plus écartées en permanence */
+/* squat-sumo : même flexion, jambes plus écartées en permanence */
 .anim-squat-sumo .fig-all{animation:kf-bob 1.6s ease-in-out infinite}
-.anim-squat-sumo .fig-leg-l{animation:kfsumo-l 1.6s ease-in-out infinite}
-.anim-squat-sumo .fig-leg-r{animation:kfsumo-r 1.6s ease-in-out infinite}
-@keyframes kfsumo-l{0%,100%{transform:rotate(22deg)}50%{transform:rotate(38deg)}}
-@keyframes kfsumo-r{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(-38deg)}}
+.anim-squat-sumo .fig-leg-l{animation:kfsumo-cuisse 1.6s ease-in-out infinite}
+.anim-squat-sumo .fig-leg-r{animation:kfsumo-cuisse 1.6s ease-in-out infinite}
+.anim-squat-sumo .fig-shin-l{animation:kfsq-tibia 1.6s ease-in-out infinite}
+.anim-squat-sumo .fig-shin-r{animation:kfsq-tibia 1.6s ease-in-out infinite}
+@keyframes kfsumo-cuisse{0%,100%{transform:rotate(24deg)}50%{transform:rotate(42deg)}}
 
-/* fente (alternée) */
+/* fente (alternée) : jambe avant plie fort, jambe arrière plie aussi (en arrière) */
 .anim-fente .fig-all{animation:kf-bob-small 1.8s ease-in-out infinite}
-.anim-fente .fig-leg-l{animation:kffente 1.8s ease-in-out infinite}
-.anim-fente .fig-leg-r{animation:kffente 1.8s ease-in-out infinite;animation-delay:.9s}
-@keyframes kffente{0%,100%{transform:rotate(12deg)}50%{transform:rotate(48deg) translateY(4px)}}
+.anim-fente .fig-leg-l{animation:kffente-cuisse 1.8s ease-in-out infinite}
+.anim-fente .fig-leg-r{animation:kffente-cuisse 1.8s ease-in-out infinite;animation-delay:.9s}
+.anim-fente .fig-shin-l{animation:kffente-tibia 1.8s ease-in-out infinite}
+.anim-fente .fig-shin-r{animation:kffente-tibia 1.8s ease-in-out infinite;animation-delay:.9s}
+@keyframes kffente-cuisse{0%,100%{transform:rotate(10deg)}50%{transform:rotate(50deg)}}
+@keyframes kffente-tibia{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-70deg)}}
 
 /* fente-laterale */
 .anim-fente-laterale .fig-all{animation:kf-bob-small 1.8s ease-in-out infinite}
 .anim-fente-laterale .fig-leg-l{animation:kffentelat 1.8s ease-in-out infinite}
 .anim-fente-laterale .fig-leg-r{animation:kffentelat 1.8s ease-in-out infinite;animation-delay:.9s}
+.anim-fente-laterale .fig-shin-l{animation:kffente-tibia 1.8s ease-in-out infinite}
+.anim-fente-laterale .fig-shin-r{animation:kffente-tibia 1.8s ease-in-out infinite;animation-delay:.9s}
 @keyframes kffentelat{0%,100%{transform:rotate(8deg)}50%{transform:rotate(55deg)}}
 
-/* hip-thrust : pulsation du bassin/torse */
+/* hip-thrust : pulsation du bassin/torse, genoux pliés fixes (position assise) */
 .anim-hip-thrust .fig-torso{animation:kfhip-torso 1.4s ease-in-out infinite}
 .anim-hip-thrust .fig-all{animation:kfhip-all 1.4s ease-in-out infinite}
+.anim-hip-thrust .fig-leg-l{transform:rotate(15deg)}
+.anim-hip-thrust .fig-leg-r{transform:rotate(15deg)}
+.anim-hip-thrust .fig-shin-l{transform:rotate(-80deg)}
+.anim-hip-thrust .fig-shin-r{transform:rotate(-80deg)}
 @keyframes kfhip-torso{0%,100%{transform:rotate(0deg)}50%{transform:rotate(14deg)}}
 @keyframes kfhip-all{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
 /* mollets : petit mouvement vertical */
 .anim-mollets .fig-all{animation:kf-bob-small 1.2s ease-in-out infinite}
 
-/* pompe */
+/* pompe : silhouette de PROFIL → les 2 bras plient ENSEMBLE, même sens */
 .anim-pompe .fig-all{animation:kf-bob-small 1.5s ease-in-out infinite}
-.anim-pompe .fig-arm-l{animation:kfpompe-l 1.5s ease-in-out infinite}
-.anim-pompe .fig-arm-r{animation:kfpompe-r 1.5s ease-in-out infinite}
+.anim-pompe .fig-arm-l{animation:kfpompe-bras 1.5s ease-in-out infinite}
+.anim-pompe .fig-arm-r{animation:kfpompe-bras 1.5s ease-in-out infinite}
+.anim-pompe .fig-forearm-l{animation:kfpompe-avbras 1.5s ease-in-out infinite}
+.anim-pompe .fig-forearm-r{animation:kfpompe-avbras 1.5s ease-in-out infinite}
 .anim-pompe .fig-torso{animation:kfpompe-t 1.5s ease-in-out infinite}
-@keyframes kfpompe-l{0%,100%{transform:rotate(20deg)}50%{transform:rotate(60deg)}}
-@keyframes kfpompe-r{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(-60deg)}}
+@keyframes kfpompe-bras{0%,100%{transform:rotate(25deg)}50%{transform:rotate(55deg)}}
+@keyframes kfpompe-avbras{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-70deg)}}
 @keyframes kfpompe-t{0%,100%{transform:rotate(0deg)}50%{transform:rotate(10deg)}}
 
-/* pompe-diamant : même schéma, bras plus resserrés */
+/* pompe-diamant : même schéma, coudes plus serrés (amplitude réduite) */
 .anim-pompe-diamant .fig-all{animation:kf-bob-small 1.5s ease-in-out infinite}
-.anim-pompe-diamant .fig-arm-l{animation:kfpompe-l 1.5s ease-in-out infinite}
-.anim-pompe-diamant .fig-arm-r{animation:kfpompe-r 1.5s ease-in-out infinite}
+.anim-pompe-diamant .fig-arm-l{animation:kfpompe-bras 1.5s ease-in-out infinite}
+.anim-pompe-diamant .fig-arm-r{animation:kfpompe-bras 1.5s ease-in-out infinite}
+.anim-pompe-diamant .fig-forearm-l{animation:kfdiamant-avbras 1.5s ease-in-out infinite}
+.anim-pompe-diamant .fig-forearm-r{animation:kfdiamant-avbras 1.5s ease-in-out infinite}
+@keyframes kfdiamant-avbras{0%,100%{transform:rotate(10deg)}50%{transform:rotate(-50deg)}}
 
-/* dips-chaise */
+/* dips-chaise : coudes plient pour descendre le buste */
 .anim-dips-chaise .fig-all{animation:kf-bob-small 1.6s ease-in-out infinite}
-.anim-dips-chaise .fig-arm-l{animation:kfdips 1.6s ease-in-out infinite}
-.anim-dips-chaise .fig-arm-r{animation:kfdips 1.6s ease-in-out infinite}
-@keyframes kfdips{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(-40deg)}}
+.anim-dips-chaise .fig-arm-l{animation:kfdips-bras 1.6s ease-in-out infinite}
+.anim-dips-chaise .fig-arm-r{animation:kfdips-bras 1.6s ease-in-out infinite}
+.anim-dips-chaise .fig-forearm-l{animation:kfdips-avbras 1.6s ease-in-out infinite}
+.anim-dips-chaise .fig-forearm-r{animation:kfdips-avbras 1.6s ease-in-out infinite}
+@keyframes kfdips-bras{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(-35deg)}}
+@keyframes kfdips-avbras{0%,100%{transform:rotate(0deg)}50%{transform:rotate(60deg)}}
 
-/* superman : bras+jambes qui se lèvent ensemble */
+/* superman : bras+jambes (tendus) qui se lèvent ensemble */
 .anim-superman .fig-arm-l{animation:kfsuper-arm 1.6s ease-in-out infinite}
 .anim-superman .fig-arm-r{animation:kfsuper-arm 1.6s ease-in-out infinite}
 .anim-superman .fig-leg-l{animation:kfsuper-leg 1.6s ease-in-out infinite}
@@ -143,15 +170,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 @keyframes kfsuper-arm{0%,100%{transform:rotate(-30deg)}50%{transform:rotate(-55deg)}}
 @keyframes kfsuper-leg{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-15deg)}}
 
-/* pike-pushup */
+/* pike-pushup : coudes plient légèrement, tête plonge entre les mains */
 .anim-pike-pushup .fig-all{animation:kf-bob-small 1.6s ease-in-out infinite}
 .anim-pike-pushup .fig-torso{animation:kfpike 1.6s ease-in-out infinite}
 .anim-pike-pushup .fig-head{animation:kfpike 1.6s ease-in-out infinite}
+.anim-pike-pushup .fig-forearm-l{animation:kfpike-avbras 1.6s ease-in-out infinite}
+.anim-pike-pushup .fig-forearm-r{animation:kfpike-avbras 1.6s ease-in-out infinite}
 @keyframes kfpike{0%,100%{transform:rotate(0deg)}50%{transform:rotate(25deg)}}
+@keyframes kfpike-avbras{0%,100%{transform:rotate(5deg)}50%{transform:rotate(-30deg)}}
 
-/* planche / planche-laterale / gainage-dynamique : maintien, léger tremblé */
+/* planche / planche-laterale : maintien, léger tremblé, coudes fixes à 90° */
 .anim-planche .fig-all,.anim-planche-laterale .fig-all{animation:kf-hold 2.2s ease-in-out infinite}
+.anim-planche .fig-forearm-l,.anim-planche .fig-forearm-r,
+.anim-planche-laterale .fig-forearm-l,.anim-planche-laterale .fig-forearm-r{transform:rotate(-75deg)}
 @keyframes kf-hold{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(2px) rotate(1deg)}}
+
+/* gainage-dynamique : touches d'épaule alternées, coude qui plie pour toucher */
+.anim-gainage-dynamique .fig-forearm-l,.anim-gainage-dynamique .fig-forearm-r{transform:rotate(-75deg)}
 .anim-gainage-dynamique .fig-arm-l{animation:kfgd-l 1.6s ease-in-out infinite}
 .anim-gainage-dynamique .fig-arm-r{animation:kfgd-r 1.6s ease-in-out infinite;animation-delay:.8s}
 @keyframes kfgd-l{0%,100%{transform:rotate(0deg)}50%{transform:rotate(50deg)}}
@@ -160,19 +195,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 /* crunch */
 .anim-crunch .fig-torso{animation:kfcrunch 1.3s ease-in-out infinite}
 .anim-crunch .fig-head{animation:kfcrunch 1.3s ease-in-out infinite}
+.anim-crunch .fig-leg-l,.anim-crunch .fig-leg-r{transform:rotate(20deg)}
+.anim-crunch .fig-shin-l,.anim-crunch .fig-shin-r{transform:rotate(-80deg)}
 @keyframes kfcrunch{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-22deg)}}
 
-/* mountain-climber : jambes alternées rapides */
-.anim-mountain-climber .fig-leg-l{animation:kfmc 0.7s ease-in-out infinite}
-.anim-mountain-climber .fig-leg-r{animation:kfmc 0.7s ease-in-out infinite;animation-delay:.35s}
-@keyframes kfmc{0%,100%{transform:rotate(15deg)}50%{transform:rotate(70deg)}}
+/* mountain-climber : genou qui vient au torse, alterné rapide */
+.anim-mountain-climber .fig-leg-l{animation:kfmc-cuisse 0.7s ease-in-out infinite}
+.anim-mountain-climber .fig-leg-r{animation:kfmc-cuisse 0.7s ease-in-out infinite;animation-delay:.35s}
+.anim-mountain-climber .fig-shin-l{animation:kfmc-tibia 0.7s ease-in-out infinite}
+.anim-mountain-climber .fig-shin-r{animation:kfmc-tibia 0.7s ease-in-out infinite;animation-delay:.35s}
+.anim-mountain-climber .fig-arm-l{transform:rotate(15deg)}
+.anim-mountain-climber .fig-arm-r{transform:rotate(-15deg)}
+@keyframes kfmc-cuisse{0%,100%{transform:rotate(15deg)}50%{transform:rotate(80deg)}}
+@keyframes kfmc-tibia{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
 
-/* leve-jambes */
+/* leve-jambes : jambes tendues qui montent ensemble */
 .anim-leve-jambes .fig-leg-l{animation:kflj 1.5s ease-in-out infinite}
 .anim-leve-jambes .fig-leg-r{animation:kflj 1.5s ease-in-out infinite}
 @keyframes kflj{0%,100%{transform:rotate(5deg)}50%{transform:rotate(-60deg)}}
 
-/* jumping-jack */
+/* jumping-jack : bras+jambes tendus qui s'écartent */
 .anim-jumping-jack .fig-all{animation:kf-jump 0.9s ease-in-out infinite}
 .anim-jumping-jack .fig-arm-l{animation:kfjj-l 0.9s ease-in-out infinite}
 .anim-jumping-jack .fig-arm-r{animation:kfjj-r 0.9s ease-in-out infinite}
@@ -183,40 +225,52 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 @keyframes kfjj-legl{0%,100%{transform:rotate(5deg)}50%{transform:rotate(25deg)}}
 @keyframes kfjj-legr{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(-25deg)}}
 
-/* burpee : séquence descente/planche/saut */
-.anim-burpee .fig-all{animation:kfburpee-all 2s ease-in-out infinite}
-.anim-burpee .fig-torso{animation:kfburpee-t 2s ease-in-out infinite}
-.anim-burpee .fig-leg-l{animation:kfburpee-l 2s ease-in-out infinite}
-.anim-burpee .fig-leg-r{animation:kfburpee-r 2s ease-in-out infinite}
-@keyframes kfburpee-all{0%,100%{transform:translateY(0)}30%{transform:translateY(16px)}70%{transform:translateY(16px)}85%{transform:translateY(-14px)}}
-@keyframes kfburpee-t{0%,100%{transform:rotate(0deg)}30%,70%{transform:rotate(60deg)}}
-@keyframes kfburpee-l{0%,100%{transform:rotate(0deg)}30%,70%{transform:rotate(-30deg)}}
-@keyframes kfburpee-r{0%,100%{transform:rotate(0deg)}30%,70%{transform:rotate(30deg)}}
+/* burpee : séquence accroupi (genoux pliés) → planche (jambes tendues) → saut */
+.anim-burpee .fig-all{animation:kfburpee-all 2.2s ease-in-out infinite}
+.anim-burpee .fig-torso{animation:kfburpee-t 2.2s ease-in-out infinite}
+.anim-burpee .fig-leg-l{animation:kfburpee-cuisse 2.2s ease-in-out infinite}
+.anim-burpee .fig-leg-r{animation:kfburpee-cuisse 2.2s ease-in-out infinite}
+.anim-burpee .fig-shin-l{animation:kfburpee-tibia 2.2s ease-in-out infinite}
+.anim-burpee .fig-shin-r{animation:kfburpee-tibia 2.2s ease-in-out infinite}
+.anim-burpee .fig-arm-l{animation:kfburpee-bras 2.2s ease-in-out infinite}
+.anim-burpee .fig-arm-r{animation:kfburpee-bras 2.2s ease-in-out infinite}
+@keyframes kfburpee-all{0%,100%{transform:translateY(0)}25%{transform:translateY(14px)}55%{transform:translateY(10px)}80%{transform:translateY(-16px)}}
+@keyframes kfburpee-t{0%,100%{transform:rotate(0deg)}25%{transform:rotate(35deg)}55%{transform:rotate(70deg)}80%{transform:rotate(0deg)}}
+@keyframes kfburpee-cuisse{0%,100%{transform:rotate(0deg)}25%{transform:rotate(40deg)}55%{transform:rotate(5deg)}}
+@keyframes kfburpee-tibia{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-60deg)}55%{transform:rotate(0deg)}}
+@keyframes kfburpee-bras{0%,100%{transform:rotate(0deg)}55%{transform:rotate(10deg)}80%{transform:rotate(-60deg)}}
 
-/* montee-genoux */
-.anim-montee-genoux .fig-leg-l{animation:kfmg 0.6s ease-in-out infinite}
-.anim-montee-genoux .fig-leg-r{animation:kfmg 0.6s ease-in-out infinite;animation-delay:.3s}
+/* montee-genoux : genou qui monte haut, alterné, rythme rapide */
+.anim-montee-genoux .fig-leg-l{animation:kfmg-cuisse 0.6s ease-in-out infinite}
+.anim-montee-genoux .fig-leg-r{animation:kfmg-cuisse 0.6s ease-in-out infinite;animation-delay:.3s}
+.anim-montee-genoux .fig-shin-l{animation:kfmg-tibia 0.6s ease-in-out infinite}
+.anim-montee-genoux .fig-shin-r{animation:kfmg-tibia 0.6s ease-in-out infinite;animation-delay:.3s}
 .anim-montee-genoux .fig-all{animation:kf-bob-small 0.6s ease-in-out infinite}
-@keyframes kfmg{0%,100%{transform:rotate(10deg)}50%{transform:rotate(-75deg)}}
+@keyframes kfmg-cuisse{0%,100%{transform:rotate(10deg)}50%{transform:rotate(-80deg)}}
+@keyframes kfmg-tibia{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-70deg)}}
 
-/* talons-fesses */
-.anim-talons-fesses .fig-leg-l{animation:kftf 0.6s ease-in-out infinite}
-.anim-talons-fesses .fig-leg-r{animation:kftf 0.6s ease-in-out infinite;animation-delay:.3s}
-@keyframes kftf{0%,100%{transform:rotate(5deg)}50%{transform:rotate(5deg) translateY(0)}25%{transform:rotate(95deg)}}
+/* talons-fesses : talon qui vient taper la fesse, genou plie fort vers l'arrière */
+.anim-talons-fesses .fig-shin-l{animation:kftf 0.6s ease-in-out infinite}
+.anim-talons-fesses .fig-shin-r{animation:kftf 0.6s ease-in-out infinite;animation-delay:.3s}
+@keyframes kftf{0%,100%{transform:rotate(0deg)}50%{transform:rotate(120deg)}}
 
-/* corde-imaginaire */
+/* corde-imaginaire : petits sauts, poignets qui tournent (avant-bras) */
 .anim-corde-imaginaire .fig-all{animation:kf-jump 0.5s ease-in-out infinite}
-.anim-corde-imaginaire .fig-arm-l{animation:kfcorde 0.5s ease-in-out infinite}
-.anim-corde-imaginaire .fig-arm-r{animation:kfcorde 0.5s ease-in-out infinite}
-@keyframes kfcorde{0%,100%{transform:rotate(10deg)}50%{transform:rotate(-10deg)}}
+.anim-corde-imaginaire .fig-forearm-l{animation:kfcorde 0.5s ease-in-out infinite}
+.anim-corde-imaginaire .fig-forearm-r{animation:kfcorde 0.5s ease-in-out infinite}
+@keyframes kfcorde{0%,100%{transform:rotate(10deg)}50%{transform:rotate(-15deg)}}
 
-/* skater */
+/* skater : saut latéral, jambe arrière qui plie derrière */
 .anim-skater .fig-all{animation:kfskater-all 1s ease-in-out infinite}
-.anim-skater .fig-leg-l{animation:kfskater-l 1s ease-in-out infinite}
-.anim-skater .fig-leg-r{animation:kfskater-r 1s ease-in-out infinite}
+.anim-skater .fig-leg-l{animation:kfskater-cuisse-l 1s ease-in-out infinite}
+.anim-skater .fig-leg-r{animation:kfskater-cuisse-r 1s ease-in-out infinite}
+.anim-skater .fig-shin-l{animation:kfskater-tibia-l 1s ease-in-out infinite}
+.anim-skater .fig-shin-r{animation:kfskater-tibia-r 1s ease-in-out infinite}
 @keyframes kfskater-all{0%,100%{transform:translateX(-10px)}50%{transform:translateX(10px)}}
-@keyframes kfskater-l{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(30deg)}}
-@keyframes kfskater-r{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-30deg)}}
+@keyframes kfskater-cuisse-l{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(35deg)}}
+@keyframes kfskater-cuisse-r{0%,100%{transform:rotate(15deg)}50%{transform:rotate(-35deg)}}
+@keyframes kfskater-tibia-l{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-50deg)}}
+@keyframes kfskater-tibia-r{0%,100%{transform:rotate(0deg)}50%{transform:rotate(50deg)}}
 
 /* défaut (échauffement / retour au calme / repos) */
 .anim-default .fig-all{animation:kf-bob-small 2s ease-in-out infinite}
@@ -476,10 +530,22 @@ function renderSessionView(){
       <div class="fig-wrap ${animClass}">
         <svg class="fig-svg" viewBox="0 0 200 200">
           <g class="fig-all">
-            <g class="fig-leg-l"><line x1="100" y1="120" x2="80" y2="178"/></g>
-            <g class="fig-leg-r"><line x1="100" y1="120" x2="120" y2="178"/></g>
-            <g class="fig-arm-l"><line x1="100" y1="75" x2="65" y2="105"/></g>
-            <g class="fig-arm-r"><line x1="100" y1="75" x2="135" y2="105"/></g>
+            <g class="fig-leg-l">
+              <line x1="100" y1="120" x2="92" y2="148"/>
+              <g class="fig-shin-l"><line x1="92" y1="148" x2="85" y2="178"/></g>
+            </g>
+            <g class="fig-leg-r">
+              <line x1="100" y1="120" x2="108" y2="148"/>
+              <g class="fig-shin-r"><line x1="108" y1="148" x2="115" y2="178"/></g>
+            </g>
+            <g class="fig-arm-l">
+              <line x1="100" y1="75" x2="80" y2="95"/>
+              <g class="fig-forearm-l"><line x1="80" y1="95" x2="68" y2="115"/></g>
+            </g>
+            <g class="fig-arm-r">
+              <line x1="100" y1="75" x2="120" y2="95"/>
+              <g class="fig-forearm-r"><line x1="120" y1="95" x2="132" y2="115"/></g>
+            </g>
             <g class="fig-torso"><line x1="100" y1="65" x2="100" y2="120"/></g>
             <g class="fig-head"><circle cx="100" cy="48" r="14"/></g>
           </g>
