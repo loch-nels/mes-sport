@@ -3,11 +3,11 @@
 //   - App shell (HTML, manifest, exercices, firebase-sync) : cache-first
 //   - Polices Google : cache-first après premier chargement
 //
-// ⚠️ 20260630-1452 est remplacé automatiquement par la date du jour
+// ⚠️ 20260630-1526 est remplacé automatiquement par la date du jour
 //    lors de chaque upload via le script de déploiement
 //    → force tous les navigateurs à vider l'ancien cache
 
-const CACHE_APP = 'sport-app-20260630-1452';
+const CACHE_APP = 'sport-app-20260630-1526';
 
 const APP_SHELL = [
   './sport_app.html',
