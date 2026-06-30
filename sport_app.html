@@ -148,8 +148,11 @@ textarea.q-text{width:100%;padding:10px;border:1.5px solid var(--border);border-
 <script src="exercices_data.js"></script>
 <script>
 // fbSync stub — remplacé par firebase-sync.js au chargement si connecté
+// (les clés sans suffixe personne servent de repli hors-connexion uniquement ;
+// une fois connecté, firebase-sync.js bascule sur des clés _lui/_elle séparées)
 let fbSyncSport = {
   saveHistorique: d => { try{localStorage.setItem('sportHistorique', JSON.stringify(d));}catch(e){} },
+  savePoids: p => { try{localStorage.setItem('sportPoids', p);}catch(e){} },
 };
 
 const WARMUP_SEC = 300;
@@ -169,7 +172,7 @@ function savePoids(){
   const v = parseFloat(document.getElementById('poids-input').value);
   if (!v || v < 30 || v > 200) return;
   poids = v;
-  localStorage.setItem('sportPoids', v);
+  fbSyncSport.savePoids(v);
 }
 
 let historique = JSON.parse(localStorage.getItem('sportHistorique') || '[]');
